@@ -122,6 +122,7 @@ const showLoadingAnimation = () => {
 
     chatContainer.scrollTo(0, chatContainer.scrollHeight);
     generateAPIResponse(incomingMessageDiv);
+    addCopyEventListeners(); // Add event listeners to new copy buttons
 };
 
 // Copy message text to the clipboard
@@ -131,6 +132,17 @@ const copyMessage = (copyButton) => {
     navigator.clipboard.writeText(messageText);
     copyButton.innerText = "done";
     setTimeout(() => (copyButton.innerText = "content_copy"), 1000);
+};
+
+// Add event listeners to copy buttons
+const addCopyEventListeners = () => {
+    const copyButtons = document.querySelectorAll(".copy-icon");
+    copyButtons.forEach((button) => {
+        button.addEventListener("click", (event) => {
+            event.stopPropagation(); // Prevent triggering other events
+            copyMessage(button);
+        });
+    });
 };
 
 // Handle sending outgoing chat messages
@@ -154,7 +166,10 @@ const handleOutgoingChat = () => {
     document.body.classList.add("hide-header");
     chatContainer.scrollTo(0, chatContainer.scrollHeight);
     addToConversationHistory("user", userMessage);
-    setTimeout(showLoadingAnimation, 500);
+    setTimeout(() => {
+        showLoadingAnimation();
+        addCopyEventListeners();
+    }, 500);
 };
 
 // Toggle between light and dark themes
@@ -240,3 +255,4 @@ sendMessageButton.addEventListener("click", handleOutgoingChat);
 // Initialize the app
 loadDataFromLocalstorage();
 initializeSpeechRecognition();
+addCopyEventListeners();

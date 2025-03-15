@@ -159,12 +159,14 @@ body.hide-header .header {
 }
 
 .chat-list .message .avatar:hover {
-  box-shadow: 0 0 20px 5px var(--accent-color);
+  box-shadow: 0 0 20px 5px var (--accent-color);
 }
 
 .chat-list .message .text {
   color: var(--text-color);
   white-space: pre-wrap;
+  flex: 1;
+  margin-right: 40px; /* Add margin to make space for the copy button */
 }
 
 /* Copy icon hidden by default, visible on hover */
@@ -172,6 +174,8 @@ body.hide-header .header {
   visibility: hidden;
   opacity: 0;
   transition: visibility 0s, opacity 0.2s ease-in-out;
+  align-self: flex-start;
+  margin-left: auto; /* Ensure the copy icon is on the right side */
 }
 
 .chat-list .message:hover .icon {
@@ -190,6 +194,7 @@ body.hide-header .header {
 
 .chat-list .message.loading .loading-indicator {
   display: flex;
+  justify-content: center; /* Center the loading indicator */
 }
 
 .chat-list .message .loading-indicator .loading-bar {
