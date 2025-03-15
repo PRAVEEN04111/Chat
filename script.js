@@ -1,10 +1,15 @@
 const typingForm = document.querySelector(".typing-form");
 const chatContainer = document.querySelector(".chat-list");
+const chatHistoryContainer = document.querySelector(".chat-history-list"); // New chat history container
+const chatHistoryModal = document.querySelector(".chat-history.modal"); // Modal for chat history
+const closeHistoryButton = document.querySelector(".close-button");
 const suggestions = document.querySelectorAll(".suggestion");
 const toggleThemeButton = document.querySelector("#theme-toggle-button");
 const deleteChatButton = document.querySelector("#delete-chat-button");
 const sendMessageButton = document.querySelector("#send-message-button");
 const microphoneButton = document.querySelector("#microphone-button");
+const newConversationButton = document.querySelector("#new-conversation-button"); // New conversation button
+const viewHistoryButton = document.querySelector("#view-history-button"); // Button to view history
 
 // State variables
 let userMessage = null;
@@ -28,6 +33,7 @@ const loadDataFromLocalstorage = () => {
     document.body.classList.toggle("hide-header", !!savedChats);
 
     chatContainer.scrollTo(0, chatContainer.scrollHeight);
+    displayChatHistory(); // Load chat history
 };
 
 // Create a new message element and return it
@@ -68,6 +74,16 @@ const addToConversationHistory = (role, message) => {
     const history = getConversationHistory();
     history.push({ role, parts: [{ text: message }] });
     localStorage.setItem("conversationHistory", JSON.stringify(history));
+};
+
+// Function to display chat history
+const displayChatHistory = () => {
+    const history = getConversationHistory();
+    chatHistoryContainer.innerHTML = ""; // Clear previous history
+    history.forEach((item) => {
+        const messageElement = createMessageElement(item.parts[0].text, item.role === "user" ? "outgoing" : "incoming");
+        chatHistoryContainer.appendChild(messageElement);
+    });
 };
 
 // Fetch response from the API based on user message and conversation history
@@ -251,6 +267,43 @@ microphoneButton.addEventListener("click", () => {
 });
 
 sendMessageButton.addEventListener("click", handleOutgoingChat);
+
+// Add event listener for new conversation button
+newConversationButton.addEventListener("click", () => {
+    const currentHistory = getConversationHistory();
+    const allHistory = JSON.parse(localStorage.getItem("allConversationHistory") || "[]");
+    allHistory.push(currentHistory);
+    localStorage.setItem("allConversationHistory", JSON.stringify(allHistory));
+
+    clearChatAndHistory();
+    typingForm.querySelector(".typing-input").value = "";
+    userMessage = null;
+    isResponseGenerating = false;
+    chatContainer.innerHTML = "";
+    document.body.classList.remove("hide-header");
+});
+
+// Add event listener for view history button
+viewHistoryButton.addEventListener("click", () => {
+    const allHistory = JSON.parse(localStorage.getItem("allConversationHistory") || "[]");
+    chatHistoryContainer.innerHTML = ""; // Clear previous history
+    allHistory.forEach((conversation, index) => {
+        const conversationDiv = document.createElement("div");
+        conversationDiv.classList.add("conversation");
+        conversationDiv.innerHTML = `<h3>Conversation ${index + 1}</h3>`;
+        conversation.forEach((item) => {
+            const messageElement = createMessageElement(item.parts[0].text, item.role === "user" ? "outgoing" : "incoming");
+            conversationDiv.appendChild(messageElement);
+        });
+        chatHistoryContainer.appendChild(conversationDiv);
+    });
+    chatHistoryModal.classList.add("show");
+});
+
+// Close chat history modal
+closeHistoryButton.addEventListener("click", () => {
+    chatHistoryModal.classList.remove("show");
+});
 
 // Initialize the app
 loadDataFromLocalstorage();
